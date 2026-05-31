@@ -44,6 +44,7 @@ $string['manualreview'] = 'Check grading with Grade Confidence';
 $string['pluginname'] = 'Grade Confidence';
 $string['privacy:metadata:coreai'] = 'Submission text is sent to the site\'s AI subsystem (core_ai) to be reviewed by the configured AI provider.';
 $string['reviewconsistent'] = 'Looks consistent — your rubric selections match the evidence.';
+$string['reviewbudget'] = 'This course has reached its configured AI review budget, so no new review was run. Ask an administrator to raise the per-course budget.';
 $string['reviewflags'] = '{$a} point(s) worth a look';
 $string['reviewnone'] = 'No AI review yet — save the grade to run one.';
 $string['reviewpartial'] = 'The assistant could not fully review this submission (it may be too long, or no provider is configured).';

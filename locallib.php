@@ -350,9 +350,11 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
      * @return string
      */
     private function partial_message(string $status): string {
-        return $status === 'toolong'
-            ? get_string('reviewtoolong', 'assignfeedback_gradeconfidence')
-            : get_string('reviewpartial', 'assignfeedback_gradeconfidence');
+        return match ($status) {
+            'toolong' => get_string('reviewtoolong', 'assignfeedback_gradeconfidence'),
+            'budgetexceeded' => get_string('reviewbudget', 'assignfeedback_gradeconfidence'),
+            default => get_string('reviewpartial', 'assignfeedback_gradeconfidence'),
+        };
     }
 
     #[\Override]
