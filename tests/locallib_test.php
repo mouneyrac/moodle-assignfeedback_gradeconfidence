@@ -94,7 +94,16 @@ final class locallib_test extends \advanced_testcase {
         $this->assertTrue($this->plugin->is_feedback_modified($this->grade, new \stdClass()));
     }
 
-    public function test_view_summary_without_review_is_empty_and_hides_link(): void {
+    public function test_view_summary_without_review_offers_the_on_demand_button(): void {
+        // On-demand is the default mode: a grader with no review yet is offered the per-student check button.
+        $showlink = true;
+        $summary = $this->plugin->view_summary($this->grade, $showlink);
+        $this->assertStringContainsString('Ask Grade Confidence to check', $summary);
+        $this->assertFalse($showlink);
+    }
+
+    public function test_view_summary_without_review_is_empty_when_reviewing_is_off(): void {
+        set_config('mode', 'off', 'aiplacement_gradeconfidence');
         $showlink = true;
         $this->assertSame('', $this->plugin->view_summary($this->grade, $showlink));
         $this->assertFalse($showlink);
@@ -258,6 +267,15 @@ final class locallib_test extends \advanced_testcase {
     public function test_grading_action_present_for_grader_in_manual_mode(): void {
         set_config('mode', 'manual', 'aiplacement_gradeconfidence');
         $this->assertArrayHasKey('review', $this->plugin->get_grading_actions());
+    }
+
+    #[\PHPUnit\Framework\Attributes\Group('security')]
+    public function test_student_cannot_trigger_an_on_demand_check(): void {
+        // The per-student "check this grade" action runs the AI and writes rows, so a student must never be
+        // able to trigger it — the capability check fires before anything happens.
+        $this->setUser($this->student);
+        $this->expectException(\core\exception\required_capability_exception::class);
+        $this->plugin->view_page('reviewone');
     }
 
     #[\PHPUnit\Framework\Attributes\Group('security')]

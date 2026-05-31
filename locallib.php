@@ -112,13 +112,13 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
     }
 
     /**
-     * The configured review mode (default automatic).
+     * The configured review mode (default on-demand — the teacher triggers checks).
      *
      * @return string One of 'auto', 'manual', 'off'.
      */
     private function current_mode(): string {
         $mode = get_config('aiplacement_gradeconfidence', 'mode');
-        return ($mode === false || $mode === '') ? 'auto' : (string) $mode;
+        return ($mode === false || $mode === '') ? 'manual' : (string) $mode;
     }
 
     #[\Override]
@@ -201,6 +201,9 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
 
     #[\Override]
     public function view_page($action) {
+        if ($action === 'reviewone') {
+            return $this->run_single_review();
+        }
         if ($action !== 'review') {
             return '';
         }
@@ -233,6 +236,61 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
             get_string('manualconfirm', 'assignfeedback_gradeconfidence', $count),
             $confirmurl,
             $backurl
+        );
+    }
+
+    /**
+     * Run an on-demand review for a single graded submission (the per-student button), then return to the
+     * grading list. Side-effecting (calls the AI + writes rows), so it is capability- and sesskey-gated.
+     *
+     * @return string
+     */
+    private function run_single_review(): string {
+        $context = $this->assignment->get_context();
+        require_capability('aiplacement/gradeconfidence:review', $context);
+        require_sesskey();
+        $userid = required_param('reviewuserid', PARAM_INT);
+        $backurl = new \moodle_url('/mod/assign/view.php', [
+            'id' => $this->assignment->get_course_module()->id,
+            'action' => 'grading',
+        ]);
+        $grade = $this->assignment->get_user_grade($userid, false);
+        $message = get_string('reviewnograde', 'assignfeedback_gradeconfidence');
+        if ($grade) {
+            try {
+                $this->review_grade($grade);
+                $message = get_string('reviewdone', 'assignfeedback_gradeconfidence');
+            } catch (\Throwable $e) {
+                debugging('on-demand review failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
+                $message = get_string('reviewfailed', 'assignfeedback_gradeconfidence');
+            }
+        }
+        redirect($backurl, $message);
+    }
+
+    /**
+     * The per-student "ask for a check now" button (on-demand mode only), pointing at the reviewone action.
+     *
+     * @param stdClass $grade An assign_grades record.
+     * @return string
+     */
+    private function request_button(stdClass $grade): string {
+        $url = new \moodle_url('/mod/assign/view.php', [
+            'id' => $this->assignment->get_course_module()->id,
+            'action' => 'viewpluginpage',
+            'pluginsubtype' => 'assignfeedback',
+            'plugin' => 'gradeconfidence',
+            'pluginaction' => 'reviewone',
+            'reviewuserid' => (int) $grade->userid,
+            'sesskey' => sesskey(),
+        ]);
+        return \html_writer::div(
+            \html_writer::link(
+                $url,
+                get_string('requestcheck', 'assignfeedback_gradeconfidence'),
+                ['class' => 'btn btn-secondary btn-sm']
+            ),
+            'gradeconfidence-request'
         );
     }
 
@@ -304,6 +362,10 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
         $showviewlink = false;
         $review = \assignfeedback_gradeconfidence\storage::get_review((int) $grade->id);
         if (!$review) {
+            // No review yet: in on-demand mode, offer the grader a per-student check button.
+            if ($this->viewer_can_grade() && $this->current_mode() === 'manual') {
+                return $this->request_button($grade);
+            }
             return '';
         }
 
@@ -361,6 +423,10 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
     public function view(stdClass $grade) {
         $review = \assignfeedback_gradeconfidence\storage::get_review((int) $grade->id);
         if (!$review) {
+            // No review yet: in on-demand mode, offer the grader a per-student check button.
+            if ($this->viewer_can_grade() && $this->current_mode() === 'manual') {
+                return $this->request_button($grade);
+            }
             return '';
         }
         // Student-facing: only the neutral assurance signal, never the internal flags/quotes.
