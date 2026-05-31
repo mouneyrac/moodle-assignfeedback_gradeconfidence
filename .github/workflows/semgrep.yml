@@ -1,0 +1,36 @@
+name: Semgrep security scan
+
+# Static application security testing for PHP (CodeQL does not support PHP). Free; results upload to this
+# repository's Security tab as code-scanning alerts, dated per run — an independent signal that complements
+# our own `--group security` test suite.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 4 * * 1'  # Weekly, Monday 04:00 UTC.
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  semgrep:
+    name: Semgrep SAST (PHP)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Semgrep
+        run: pip3 install --quiet semgrep
+
+      - name: Scan (PHP + general security rules)
+        run: semgrep scan --config p/php --config p/security-audit --sarif --output semgrep.sarif
+        continue-on-error: true
+
+      - name: Upload results to the Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif

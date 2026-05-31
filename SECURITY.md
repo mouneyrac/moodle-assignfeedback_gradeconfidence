@@ -27,7 +27,8 @@ companions:
 - **Executable security suite** — `vendor/bin/phpunit --group security` asserts the access-control,
   privacy-gating and attack-surface invariants on every CI run (e.g. that a student only ever sees the
   neutral assurance signal, never the internal flags or quotes).
-- **CodeQL** static analysis runs on every push and weekly — see this repository's **Security** tab.
+- **Semgrep** static analysis (SAST for PHP) runs on every push and weekly — results appear in this
+  repository's **Security** tab.
 - A **threat-focused manual security review** (data theft, privilege escalation, abuse).
 - **Zero third-party runtime dependencies** by design.
 
