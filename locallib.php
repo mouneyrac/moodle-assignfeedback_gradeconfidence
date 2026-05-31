@@ -260,7 +260,12 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
         $guard = new \aiplacement_gradeconfidence\local\credit_guard();
         $status = $guard->status((int) $context->id, (int) $USER->id);
         if ($status['enabled'] && !$status['can']) {
-            redirect($backurl, get_string('creditsout', 'assignfeedback_gradeconfidence'));
+            $requesturl = new \moodle_url('/ai/placement/gradeconfidence/creditrequest.php', [
+                'courseid' => (int) $this->assignment->get_course_module()->course,
+                'sesskey' => sesskey(),
+            ]);
+            redirect($backurl, get_string('creditsout', 'assignfeedback_gradeconfidence') . ' '
+                . \html_writer::link($requesturl, get_string('requestmore', 'assignfeedback_gradeconfidence')));
         }
 
         $grade = $this->assignment->get_user_grade($userid, false);
@@ -289,9 +294,14 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
         $guard = new \aiplacement_gradeconfidence\local\credit_guard();
         $status = $guard->status((int) $this->assignment->get_context()->id, (int) $USER->id);
         if ($status['enabled'] && !$status['can']) {
-            // Allowance used up for this course: a quiet note instead of the button.
+            // Allowance used up for this course: a quiet note plus a one-click "ask for more" link.
+            $requesturl = new \moodle_url('/ai/placement/gradeconfidence/creditrequest.php', [
+                'courseid' => (int) $this->assignment->get_course_module()->course,
+                'sesskey' => sesskey(),
+            ]);
             return \html_writer::div(
-                get_string('creditsoutshort', 'assignfeedback_gradeconfidence'),
+                get_string('creditsoutshort', 'assignfeedback_gradeconfidence') . ' '
+                    . \html_writer::link($requesturl, get_string('requestmore', 'assignfeedback_gradeconfidence')),
                 'gradeconfidence-credits text-muted'
             );
         }
