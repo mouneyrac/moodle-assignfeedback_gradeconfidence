@@ -391,6 +391,39 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
         return \assignfeedback_gradeconfidence\storage::get_review((int) $grade->id) === null;
     }
 
+    /**
+     * Show the grader their remaining check allowance inside the grade form — informational only.
+     *
+     * The actual on-demand trigger stays in the submissions list, because a check needs the *saved* grade
+     * (the in-form value is not persisted yet). This static line just surfaces "how many checks do I have
+     * left" where the teacher is grading. Shown only to graders, in on-demand mode, when credits are on.
+     *
+     * @param mixed $grade The grade data (unused; the allowance is per-teacher, not per-student).
+     * @param MoodleQuickForm $mform The grade form.
+     * @param stdClass $data The form data.
+     * @param int $userid The user being graded (unused, same reason).
+     * @return bool True if an element was added.
+     */
+    #[\Override]
+    public function get_form_elements_for_user($grade, MoodleQuickForm $mform, stdClass $data, $userid) {
+        global $USER;
+        if (!$this->viewer_can_grade() || $this->current_mode() !== 'manual') {
+            return false;
+        }
+        $guard = new \aiplacement_gradeconfidence\local\credit_guard();
+        $status = $guard->status((int) $this->assignment->get_context()->id, (int) $USER->id);
+        if (!$status['enabled']) {
+            return false;
+        }
+        $mform->addElement(
+            'static',
+            'assignfeedback_gradeconfidence_credits',
+            get_string('pluginname', 'assignfeedback_gradeconfidence'),
+            get_string('creditstatus', 'assignfeedback_gradeconfidence', $status['remaining'])
+        );
+        return true;
+    }
+
     #[\Override]
     public function view_summary(stdClass $grade, &$showviewlink) {
         $showviewlink = false;

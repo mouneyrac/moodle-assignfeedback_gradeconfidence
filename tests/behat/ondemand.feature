@@ -48,6 +48,14 @@ Feature: On-demand Grade Confidence checks and per-teacher credits on the gradin
     Then I should see "Ask Grade Confidence to check this grade"
     And I should see "5 checks left"
 
+  Scenario: The single grader form shows the teacher their remaining credit count
+    Given the following config values are set as admin:
+      | mode           | manual | aiplacement_gradeconfidence |
+      | defaultcredits | 5      | aiplacement_gradeconfidence |
+    And I am on the "Essay 1" "assign activity" page logged in as teacher1
+    When I go to "Priya Student" "Essay 1" activity advanced grading page
+    Then I should see "AI checks: 5 left in this course"
+
   Scenario: An exhausted allowance replaces the button with a request-more note
     Given the following config values are set as admin:
       | mode           | manual | aiplacement_gradeconfidence |

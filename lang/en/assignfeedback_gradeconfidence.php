@@ -33,6 +33,7 @@ $string['assessmentsummary'] = 'AI assessment of {$a} criterion/criteria';
 $string['creditsleft'] = '({$a} checks left)';
 $string['creditsout'] = 'You have used your AI check allowance for this course.';
 $string['creditsoutshort'] = 'AI check allowance used up for this course.';
+$string['creditstatus'] = 'AI checks: {$a} left in this course';
 $string['default'] = 'Enabled by default';
 $string['default_help'] = 'If set, this feedback method will be enabled by default for all new assignments.';
 $string['enabled'] = 'Grade Confidence';
