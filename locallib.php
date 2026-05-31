@@ -401,6 +401,9 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
         if ($review['status'] !== 'ok') {
             return $this->partial_message($review['status']);
         }
+        if ($this->is_low_confidence($review)) {
+            return get_string('reviewlowconfidenceshort', 'assignfeedback_gradeconfidence');
+        }
         if ($this->is_assessment($review['flags'])) {
             $showviewlink = true;
             return get_string('assessmentsummary', 'assignfeedback_gradeconfidence', count($review['flags']));
@@ -459,6 +462,14 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
         }
         if ($review['status'] !== 'ok') {
             return $this->partial_message($review['status']);
+        }
+        if ($this->is_low_confidence($review)) {
+            // Withhold a review the samples disagreed on rather than show flags the AI was unsure about.
+            return $this->panel(\html_writer::div(
+                get_string('reviewlowconfidence', 'assignfeedback_gradeconfidence'),
+                'gradeconfidence-lowconf',
+                ['role' => 'status']
+            ));
         }
         // Decorative icon: hidden from screen readers (the adjacent text carries the meaning, so the
         // state is never conveyed by colour or icon alone).
@@ -533,6 +544,19 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
             }
         }
         return true;
+    }
+
+    /**
+     * Whether a review should be withheld because the independent samples disagreed too much (below the
+     * site's minimum-confidence threshold). We would rather show nothing than a review we do not trust.
+     *
+     * @param array $review The stored review.
+     * @return bool
+     */
+    private function is_low_confidence(array $review): bool {
+        $confidence = $review['confidence'] ?? null;
+        $min = (int) get_config('aiplacement_gradeconfidence', 'minconfidence');
+        return $confidence !== null && $min > 0 && $confidence < $min;
     }
 
     /**
