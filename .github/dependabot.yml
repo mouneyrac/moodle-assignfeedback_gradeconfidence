@@ -1,0 +1,8 @@
+version: 2
+# We ship zero third-party PHP runtime dependencies by design, so the only thing to keep current is the
+# GitHub Actions used by our own CI/security workflows.
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -166,6 +166,7 @@ final class locallib_test extends \advanced_testcase {
         ]]]);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('security')]
     public function test_student_never_sees_the_internal_flags_or_quotes(): void {
         $this->store_notify_with_secrets();
         $this->setUser($this->student);
@@ -194,6 +195,7 @@ final class locallib_test extends \advanced_testcase {
         $this->assertStringContainsString('SECRETQUOTE', $view);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('security')]
     public function test_student_sees_nothing_when_review_did_not_complete(): void {
         // A failed/partial review must not even disclose to the student that a review was attempted.
         $this->store(['status' => 'error', 'alert' => 'partial', 'flags' => []]);
@@ -218,6 +220,7 @@ final class locallib_test extends \advanced_testcase {
         );
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('security')]
     public function test_student_never_sees_detection(): void {
         $this->store([
             'status' => 'ok', 'alert' => 'consistent', 'flags' => [], 'detection' => 'high',
@@ -257,6 +260,7 @@ final class locallib_test extends \advanced_testcase {
         $this->assertArrayHasKey('review', $this->plugin->get_grading_actions());
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('security')]
     public function test_grading_action_hidden_from_students_in_manual_mode(): void {
         set_config('mode', 'manual', 'aiplacement_gradeconfidence');
         $this->setUser($this->student);
