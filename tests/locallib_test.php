@@ -25,10 +25,10 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
  * Tests for the assign_feedback_gradeconfidence plugin class (render/summary/modified/save gating).
  *
  * @package    assignfeedback_gradeconfidence
- * @covers     \assign_feedback_gradeconfidence
  * @copyright  2026 onwards
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\assign_feedback_gradeconfidence::class)]
 final class locallib_test extends \advanced_testcase {
     /** @var \assign */
     private $assign;

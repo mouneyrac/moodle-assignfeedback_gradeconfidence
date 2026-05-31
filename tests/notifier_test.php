@@ -20,10 +20,10 @@ namespace assignfeedback_gradeconfidence;
  * Tests for the exception-based notifier.
  *
  * @package    assignfeedback_gradeconfidence
- * @covers     \assignfeedback_gradeconfidence\notifier
  * @copyright  2026 onwards
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\assignfeedback_gradeconfidence\notifier::class)]
 final class notifier_test extends \advanced_testcase {
     protected function setUp(): void {
         parent::setUp();

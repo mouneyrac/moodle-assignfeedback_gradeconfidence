@@ -28,10 +28,10 @@ require_once($CFG->dirroot . '/grade/grading/lib.php');
  * the engine's rubric_mapper_test; this verifies the wiring against real grading data.
  *
  * @package    assignfeedback_gradeconfidence
- * @covers     \assignfeedback_gradeconfidence\grading_source
  * @copyright  2026 onwards
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\assignfeedback_gradeconfidence\grading_source::class)]
 final class grading_source_test extends \advanced_testcase {
     /** @var \stdClass */
     private $course;

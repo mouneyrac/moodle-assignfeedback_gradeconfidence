@@ -20,10 +20,10 @@ namespace assignfeedback_gradeconfidence;
  * Tests for the adapter storage seam (delegates to the engine run_store, keyed by 'assign' + grade id).
  *
  * @package    assignfeedback_gradeconfidence
- * @covers     \assignfeedback_gradeconfidence\storage
  * @copyright  2026 onwards
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\assignfeedback_gradeconfidence\storage::class)]
 final class storage_test extends \advanced_testcase {
     public function test_save_then_get_roundtrips(): void {
         $this->resetAfterTest();

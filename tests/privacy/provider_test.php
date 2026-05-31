@@ -24,10 +24,10 @@ use mod_assign\privacy\assign_plugin_request_data;
  * Tests for the assign adapter privacy provider (declares the core_ai flow; delegates deletion).
  *
  * @package    assignfeedback_gradeconfidence
- * @covers     \assignfeedback_gradeconfidence\privacy\provider
  * @copyright  2026 onwards
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+#[\PHPUnit\Framework\Attributes\CoversClass(\assignfeedback_gradeconfidence\privacy\provider::class)]
 final class provider_test extends \advanced_testcase {
     /**
      * Build a real assign + module context.
