@@ -1,0 +1,37 @@
+/* Grade Confidence feedback panel. Colour is a secondary cue only — every state also carries an icon
+   and text, so the panel is legible without colour (WCAG 1.4.1 use of colour). */
+.gradeconfidence-panel {
+    border-inline-start: 3px solid #8a5a00;
+    background: #fff4e0;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+.gradeconfidence-consistent {
+    color: #2f6f2c;
+    font-weight: 600;
+}
+.gradeconfidence-student {
+    color: #2f6f2c;
+}
+.gradeconfidence-flags-heading {
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+.gradeconfidence-flags {
+    margin: 0;
+    padding-inline-start: 18px;
+}
+.gradeconfidence-flag {
+    margin-bottom: 10px;
+}
+.gradeconfidence-reason {
+    margin: 2px 0;
+}
+.gradeconfidence-quote {
+    border-inline-start: 3px solid #f0d49a;
+    background: #fffdf7;
+    margin: 4px 0;
+    padding: 4px 10px;
+    color: #4a4640;
+    font-size: 0.95em;
+}
