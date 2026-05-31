@@ -246,6 +246,7 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
      * @return string
      */
     private function run_single_review(): string {
+        global $USER;
         $context = $this->assignment->get_context();
         require_capability('aiplacement/gradeconfidence:review', $context);
         require_sesskey();
@@ -254,11 +255,20 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
             'id' => $this->assignment->get_course_module()->id,
             'action' => 'grading',
         ]);
+
+        // Per-teacher credit gate: stop before spending a check once the allowance is used up.
+        $guard = new \aiplacement_gradeconfidence\local\credit_guard();
+        $status = $guard->status((int) $context->id, (int) $USER->id);
+        if ($status['enabled'] && !$status['can']) {
+            redirect($backurl, get_string('creditsout', 'assignfeedback_gradeconfidence'));
+        }
+
         $grade = $this->assignment->get_user_grade($userid, false);
         $message = get_string('reviewnograde', 'assignfeedback_gradeconfidence');
         if ($grade) {
             try {
                 $this->review_grade($grade);
+                $guard->consume((int) $context->id, (int) $USER->id);
                 $message = get_string('reviewdone', 'assignfeedback_gradeconfidence');
             } catch (\Throwable $e) {
                 debugging('on-demand review failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -275,6 +285,16 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
      * @return string
      */
     private function request_button(stdClass $grade): string {
+        global $USER;
+        $guard = new \aiplacement_gradeconfidence\local\credit_guard();
+        $status = $guard->status((int) $this->assignment->get_context()->id, (int) $USER->id);
+        if ($status['enabled'] && !$status['can']) {
+            // Allowance used up for this course: a quiet note instead of the button.
+            return \html_writer::div(
+                get_string('creditsoutshort', 'assignfeedback_gradeconfidence'),
+                'gradeconfidence-credits text-muted'
+            );
+        }
         $url = new \moodle_url('/mod/assign/view.php', [
             'id' => $this->assignment->get_course_module()->id,
             'action' => 'viewpluginpage',
@@ -284,14 +304,18 @@ class assign_feedback_gradeconfidence extends assign_feedback_plugin {
             'reviewuserid' => (int) $grade->userid,
             'sesskey' => sesskey(),
         ]);
-        return \html_writer::div(
-            \html_writer::link(
-                $url,
-                get_string('requestcheck', 'assignfeedback_gradeconfidence'),
-                ['class' => 'btn btn-secondary btn-sm']
-            ),
-            'gradeconfidence-request'
+        $button = \html_writer::link(
+            $url,
+            get_string('requestcheck', 'assignfeedback_gradeconfidence'),
+            ['class' => 'btn btn-secondary btn-sm']
         );
+        if ($status['enabled']) {
+            $button .= ' ' . \html_writer::span(
+                get_string('creditsleft', 'assignfeedback_gradeconfidence', $status['remaining']),
+                'gradeconfidence-credits text-muted'
+            );
+        }
+        return \html_writer::div($button, 'gradeconfidence-request');
     }
 
     /**
